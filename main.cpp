@@ -15234,6 +15234,8 @@ Chess Life = Chess Life
 ZooKeys = ZooKeys
 Zootaxa = Zootaxa
 The EMBO Journal = EMBO J.
+Communications Chemistry = Commun. Chem.
+Cell Systems = Cell Syst.
 )RULES";
 
 std::vector<std::string> parse_rules_reversed(const std::string& raw_text) {
