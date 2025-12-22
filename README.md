@@ -3,8 +3,8 @@
 ## Usage
 
 ```bash
-git clone https://github.com/xu-shi-jie/bib-journal-abbreviator
-cd bib-journal-abbreviator
+git clone https://github.com/xu-shi-jie/refabbr
+cd refabbr
 make all
 mv refabbr /usr/local/bin
 ```
