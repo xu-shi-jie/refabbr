@@ -7,73 +7,168 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-release:
-    runs-on: ubuntu-latest
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            name: linux-x64
+            artifact_name: refabbr
+            asset_name: refabbr-linux-x64
+            archive_ext: tar.gz
+          - os: macos-latest
+            name: macos-x64
+            artifact_name: refabbr
+            asset_name: refabbr-macos-x64
+            archive_ext: tar.gz
+          - os: windows-latest
+            name: windows-x64
+            artifact_name: refabbr.exe
+            asset_name: refabbr-windows-x64
+            archive_ext: zip
+
+    runs-on: ${{ matrix.os }}
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Setup build environment
+    - name: Setup build environment (Ubuntu)
+      if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential g++ musl musl-dev musl-tools
+        sudo apt-get install -y build-essential g++
         
-    - name: Build C++ application
+    - name: Setup build environment (macOS)
+      if: matrix.os == 'macos-latest'
       run: |
-        make all
+        brew install gcc
         
-    - name: Test build
+    - name: Setup build environment (Windows)
+      if: matrix.os == 'windows-latest'
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW64
+        update: true
+        install: mingw-w64-x86_64-gcc make
+
+    - name: Build C++ application (Ubuntu)
+      if: matrix.os == 'ubuntu-latest'
       run: |
-        ls -la refabbr
-        ./refabbr --help || echo "Build successful"
+        g++ -std=c++17 -o refabbr main.cpp -O3 -static
         
-    - name: Prepare release assets
+    - name: Build C++ application (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        g++ -std=c++17 -o refabbr main.cpp -O3
+        
+    - name: Build C++ application (Windows)
+      if: matrix.os == 'windows-latest'
+      shell: msys2 {0}
+      run: |
+        g++ -std=c++17 -o refabbr.exe main.cpp -O3 -static
+        
+    - name: Test build (Unix)
+      if: matrix.os != 'windows-latest'
+      run: |
+        ls -la ${{ matrix.artifact_name }}
+        ./${{ matrix.artifact_name }} --help || echo "Build successful"
+        
+    - name: Test build (Windows)
+      if: matrix.os == 'windows-latest'
+      shell: msys2 {0}
+      run: |
+        ls -la ${{ matrix.artifact_name }}
+        ./${{ matrix.artifact_name }} --help || echo "Build successful"
+        
+    - name: Prepare release assets (Unix)
+      if: matrix.os != 'windows-latest'
       run: |
         mkdir -p release
-        cp refabbr release/
+        cp ${{ matrix.artifact_name }} release/
         cp README.md release/
-        tar -czf bib-journal-abbreviator-linux-x64.tar.gz -C release .
+        tar -czf ${{ matrix.asset_name }}.${{ matrix.archive_ext }} -C release .
         
+    - name: Prepare release assets (Windows)
+      if: matrix.os == 'windows-latest'
+      shell: pwsh
+      run: |
+        New-Item -ItemType Directory -Force -Path release
+        Copy-Item ${{ matrix.artifact_name }} release/
+        Copy-Item README.md release/
+        Compress-Archive -Path release/* -DestinationPath ${{ matrix.asset_name }}.${{ matrix.archive_ext }}
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.asset_name }}
+        path: ${{ matrix.asset_name }}.${{ matrix.archive_ext }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+
+    - name: List artifacts
+      run: |
+        ls -la artifacts/
+        find artifacts -type f
+
     - name: Get version from tag
       id: get_version
       run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
       
     - name: Create Release
       id: create_release
-      uses: actions/create-release@v1
+      uses: softprops/action-gh-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ steps.get_version.outputs.VERSION }}
-        release_name: BibTeX Journal Abbreviator ${{ steps.get_version.outputs.VERSION }}
+        name: BibTeX Journal Abbreviator ${{ steps.get_version.outputs.VERSION }}
         body: |
           ## Changes in ${{ steps.get_version.outputs.VERSION }}
           
           ### 🚀 Features
-          - Automatic build and release for Ubuntu/Linux x64
+          - Automatic build and release for multiple platforms
           
           ### 📦 Download
-          - Download `bib-journal-abbreviator-linux-x64.tar.gz` for Linux x64 systems
-          - Extract and run `./refabbr` or use the Python version `python3 main.v1.py`
+          | Platform | Download |
+          |----------|----------|
+          | Linux x64 | `refabbr-linux-x64.tar.gz` |
+          | macOS x64 | `refabbr-macos-x64.tar.gz` |
+          | Windows x64 | `refabbr-windows-x64.zip` |
           
           ### 📝 Usage
+          
+          **Linux/macOS:**
           ```bash
           # Extract the archive
-          tar -xzf bib-journal-abbreviator-linux-x64.tar.gz
+          tar -xzf refabbr-<platform>-x64.tar.gz
           
-          # Run the C++ version
+          # Run the application
           ./refabbr ref.bib
+          ```
+          
+          **Windows:**
+          ```powershell
+          # Extract the zip file
+          Expand-Archive refabbr-windows-x64.zip -DestinationPath .
+          
+          # Run the application
+          .\refabbr.exe ref.bib
           ```
         draft: false
         prerelease: false
-        
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./bib-journal-abbreviator-linux-x64.tar.gz
-        asset_name: bib-journal-abbreviator-linux-x64.tar.gz
-        asset_content_type: application/gzip
+        files: |
+          artifacts/refabbr-linux-x64/refabbr-linux-x64.tar.gz
+          artifacts/refabbr-macos-x64/refabbr-macos-x64.tar.gz
+          artifacts/refabbr-windows-x64/refabbr-windows-x64.zip
