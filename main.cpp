@@ -14236,27 +14236,79 @@ std::string replace_journals(
 }
 
 
+void print_help(const char* program_name) {
+    std::cout << "refabbr - BibTeX Journal Name Abbreviator\n\n"
+              << "Usage:\n"
+              << "  " << program_name << " <input.bib>              Replace journal names (output: input-abbr.bib)\n"
+              << "  " << program_name << " <input.bib> <output.bib> Write to specified output file\n"
+              << "  " << program_name << " <input.bib> nodot        Remove trailing dots from abbreviations\n\n"
+              << "Options:\n"
+              << "  -h, --help     Show this help message\n"
+              << "  -v, --version  Show version information\n\n"
+              << "Examples:\n"
+              << "  " << program_name << " references.bib\n"
+              << "  " << program_name << " input.bib output.bib\n"
+              << "  " << program_name << " references.bib nodot\n\n"
+              << "Repository: https://github.com/xu-shi-jie/refabbr\n";
+}
+
+void print_version() {
+    std::cout << "refabbr version 1.3.3\n";
+}
+
 int main(int argc, char* argv[]) {
     if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " <input.bib> [nodot]" << std::endl;
+        print_help(argv[0]);
         return 1;
     }
 
-    std::string input_path = argv[1];
-    bool nodot = (argc >= 3 && std::string(argv[2]) == "nodot");
+    std::string arg1 = argv[1];
+    
+    // Handle help and version flags
+    if (arg1 == "-h" || arg1 == "--help") {
+        print_help(argv[0]);
+        return 0;
+    }
+    if (arg1 == "-v" || arg1 == "--version") {
+        print_version();
+        return 0;
+    }
+
+    std::string input_path = arg1;
+    bool nodot = false;
+    std::string output_path;
+
+    // Parse arguments
+    if (argc >= 3) {
+        std::string arg2 = argv[2];
+        if (arg2 == "nodot") {
+            nodot = true;
+        } else {
+            output_path = arg2;
+        }
+    }
+    if (argc >= 4) {
+        std::string arg3 = argv[3];
+        if (arg3 == "nodot") {
+            nodot = true;
+        }
+    }
+
+    // Default output path
+    if (output_path.empty()) {
+        output_path = input_path;
+        size_t pos = output_path.rfind(".bib");
+        if (pos != std::string::npos) {
+            output_path.replace(pos, 4, "-abbr.bib");
+        } else {
+            output_path += "-abbr.bib";
+        }
+    }
 
     std::string bibtexdb = read_file(input_path);
 
     auto rules = parse_rules_reversed(journal_rules_raw);
     std::string modified_bib = replace_journals(bibtexdb, rules, nodot);
-
-    std::string output_path = input_path;
-    size_t pos = output_path.rfind(".bib");
-    if (pos != std::string::npos) {
-        output_path.replace(pos, 4, "-abbr.bib");
-    } else {
-        output_path += "-abbr.bib";
-    }
 
     std::ofstream out_file(output_path);
     if (!out_file.is_open()) {
@@ -14266,7 +14318,7 @@ int main(int argc, char* argv[]) {
     out_file << modified_bib;
     out_file.close();
 
-    std::cout << "Bibtex database with abbreviated files saved into " << output_path << std::endl;
+    std::cout << "Bibtex database with abbreviated journals saved to " << output_path << std::endl;
 
     return 0;
 }
