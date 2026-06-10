@@ -14156,7 +14156,11 @@ Communications in Statistics-theory and Methods = Commun. Stat.- Theory Methods
 IEEE Transactions on pattern analysis and machine intelligence = IEEE Trans. Pattern Anal. Mach. Intell.
 Journal of machine learning research = J. Mach. Learn. Res.
 Journal of computational biophysics and chemistry = J. Comput. Biophys. Chem.
-The Journal of chemical physics  = J. Chem. Phys
+The Journal of chemical physics = J. Chem. Phys.
+The Journal of Chemical Physics = J. Chem. Phys.
+Nature Machine Intelligence = Nat. Mach. Intell.
+Advances in Neural Information Processing Systems = Adv. Neural Inf. Process. Syst.
+International Conference on Learning Representations = Int. Conf. Learn. Represent.
 Machine learning = Mach. Learn.
 Current protocols in bioinformatics = Curr. Protoc. Bioinform.
 Biology direct = Biol. Direct
@@ -14253,7 +14257,7 @@ void print_help(const char* program_name) {
 }
 
 void print_version() {
-    std::cout << "refabbr version 1.3.3\n";
+    std::cout << "refabbr version 1.3.4\n";
 }
 
 int main(int argc, char* argv[]) {

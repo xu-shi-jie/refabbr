@@ -48,6 +48,10 @@ refabbr input.bib output.bib
 refabbr --help
 ```
 
+## Update (2026-06-10)
+- Current version: 1.3.4
+Add J. Chem. Phys., Nat. Mach. Intell., NeurIPS, ICLR abbreviations.
+
 ## Update (2025-12-10)
 - Current version: 1.3.1
 Update abbreviations
