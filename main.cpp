@@ -11404,7 +11404,7 @@ Proceedings of the Koninklijke Nederlandse Akademie Van Wetenschappen. Series C:
 Proceedings of the Latvian Academy of Sciences, Section B: Natural, Exact and Applied Sciences = Proc. Latv. Acad. Sci. Sect. B
 Proceedings of the Mine Medical Officers Association = Proc. Mine Med. Off. Assoc.
 Proceedings of the Mine Medical Officers Association of SA = Proc. Mine Med. Off. Assoc. SA
-Proceedings of the National Academy of Sciences of the United States of America = Proc. Natl. Acad. Sci. U.S.A.
+Proceedings of the National Academy of Sciences of the United States of America = Proc. Natl. Acad. Sci. U. S. A.
 Proceedings of the National Cancer Conference = Proc. Natl. Cancer Conf.
 Proceedings of the National Science Council, Republic of China. Part B, Life Sciences = Proc. Natl. Sci. Counc. Repub. China B
 Proceedings of the Nutrition Society = Proc. Nutr. Soc.
@@ -14151,7 +14151,7 @@ Zoosystematics and Evolution = Zoosyst. Evol.
 IEEE transactions on automatic control = IEEE Trans. Autom. Control
 Mathematical Social Sciences = Math. Social Sci.
 Zoologica Scripta = Zool. Scr.
-Proceedings of the National Academy of Sciences = Proc. Natl. Acad. Sci.
+Proceedings of the National Academy of Sciences = Proc. Natl. Acad. Sci. U. S. A.
 Communications in Statistics-theory and Methods = Commun. Stat.- Theory Methods
 IEEE Transactions on pattern analysis and machine intelligence = IEEE Trans. Pattern Anal. Mach. Intell.
 Journal of machine learning research = J. Mach. Learn. Res.
@@ -14169,6 +14169,8 @@ Environmental Science & Technology = Environ. Sci. Technol.
 The EMBO Journal = EMBO J.
 Communications Chemistry = Commun. Chem.
 Cell Systems = Cell Syst.
+ACS Omega = ACS Omega
+bioRxiv = bioRxiv
 )RULES";
 
 std::vector<std::string> parse_rules_reversed(const std::string& raw_text) {

@@ -48,6 +48,10 @@ refabbr input.bib output.bib
 refabbr --help
 ```
 
+## Update (2026-10-15)
+- Current version: 1.3.4
+Use the ACS/CASSI form `Proc. Natl. Acad. Sci. U. S. A.` for PNAS; add ACS Omega and bioRxiv case normalization.
+
 ## Update (2026-06-10)
 - Current version: 1.3.4
 Add J. Chem. Phys., Nat. Mach. Intell., NeurIPS, ICLR abbreviations.
